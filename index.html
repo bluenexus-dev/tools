@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blue Nexus | Tools</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicons/favicon.tools.png" type="image/png">
+
+  <style>
+    :root {
+      --main-bg: #2c2c2c;
+      --side-bg: #3a3a3a;
+      --header-bg: #141414;
+      --footer-bg: #141414;
+      --text-color: #ffffff;
+
+      --knowledge-color: #F5A623;
+      --tools-color: #50E3C2;
+      --coding-color: #188038;
+      --play-color: #9013FE;
+      --picker-color: #B8E986;
+      --design-color: #D0021B;
+
+      --card-bg: rgba(255,255,255,0.02);
+      --muted: rgba(255,255,255,0.55);
+      --panel: #141414;
+      --btn-grey: #d9d9d9;
+      --btn-grey-dark: #cfcfcf;
+      --btn-text: #141414;
+    }
+
+    /* base layout: keep footer at bottom */
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--side-bg);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* header */
+    header.main-header {
+      background-color: var(--header-bg);
+      height: 220px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding: 0 24px;
+    }
+
+    .header-logo {
+      height: 180px;
+      width: auto;
+      position: absolute;
+      left: 20%;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 24px;
+      right: 48px;
+      background-color: var(--tools-color); /* theme accent for tools */
+      color: #141414;
+      border: none;
+      padding: 10px 18px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.18s ease, transform 0.12s ease;
+    }
+    .back-button:hover { transform: translateY(-2px); opacity: 0.95; }
+
+    /* main content wrapper (kept 60% width as blueprint) */
+    .main-content {
+      width: 60%;
+      margin: 0 auto;
+      background-color: var(--main-bg);
+      padding: 2rem 2.5rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      box-sizing: border-box;
+      flex: 1 0 auto;
+    }
+
+    h1.page-title {
+      margin: 0 0 8px 0;
+      font-size: 1.4rem;
+      color: var(--tools-color);
+    }
+    p.lead { margin: 0 0 18px 0; color: var(--muted); }
+
+    /* Sections / dropdowns */
+    .section {
+      margin-bottom: 1.25rem;
+      background: var(--panel);
+      border-radius: 10px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .section-title {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .section-toggle {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.04);
+      color: var(--muted);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .section-body {
+      margin-top: 12px;
+      display: none;
+      gap: 10px;
+    }
+    .section-body.open { display: flex; flex-wrap: wrap; }
+
+    /* tool buttons (consistent, grey, not browser-default) */
+    .tool-button {
+      background: var(--btn-grey);
+      color: var(--btn-text);
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+      margin: 6px;
+      min-width: 220px;
+      text-align: left;
+    }
+    .tool-button:hover { background: var(--btn-grey-dark); transform: translateY(-2px); }
+
+    /* popup (large) */
+    .popup {
+      display: none;
+      position: fixed;
+      z-index: 4000;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: calc(100% - 48px);
+      max-width: 920px;
+      max-height: 86vh;
+      overflow: auto;
+      background: var(--main-bg);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      padding: 18px;
+    }
+    .popup .popup-header {
+      display:flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .popup h3 { margin: 0; color: var(--tools-color); }
+    .popup .close-btn {
+      background: #bdbdbd;
+      border: none;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #141414;
+    }
+
+    /* small inputs / layouts inside popup */
+    .row { display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap; }
+    .col { flex:1 1 200px; min-width:160px; }
+    input[type="text"], input[type="number"], select, textarea {
+      width:100%;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      color: #fff;
+      box-sizing: border-box;
+    }
+    label { font-size:0.9rem; color: var(--muted); display:block; margin-bottom:6px; }
+
+    .result-block {
+      background: rgba(255,255,255,0.02);
+      padding:10px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.03);
+      margin-top:8px;
+      color:#fff;
+      font-weight:700;
+    }
+
+    /* footer */
+    footer.main-footer {
+      background-color: var(--footer-bg);
+      text-align: center;
+      padding: 1.25rem 0;
+      color: rgba(255,255,255,0.6);
+      margin-top: auto;
+    }
+
+    /* responsive */
+    @media (max-width: 900px) {
+      .main-content { width: 92%; padding: 18px; }
+      .tool-button { min-width: 100%; }
+      .header-logo { left: 10%; height: 140px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="main-header">
+    <img src="images/logos/logo.tools.png" alt="Blue Nexus Tools Logo" class="header-logo">
+    <button class="back-button" onclick="history.back()">Back</button>
+  </header>
+
+  <main class="main-content">
+    <h1 class="page-title">Tools</h1>
+    <p class="lead">Utility tools for quick conversions, DMX helpers and general utilities — client-side only.</p>
+
+    <!-- Conversion Tools -->
+    <section class="section" id="sec-conversion">
+      <div class="section-header" onclick="toggleSection('conversion')">
+        <div class="section-title">Conversion Tools</div>
+        <button class="section-toggle">Toggle</button>
+      </div>
+      <div class="section-body" id="conversion-body">
+        <button class="tool-button" onclick="openTool('hexrgb')">Hex ↔ RGB Converter</button>
+        <button class="tool-button" onclick="openTool('baseconv')">Decimal ↔ Binary ↔ Hexadecimal Converter</button>
+        <button class="tool-button" onclick="openTool('ascii')">ASCII ↔ Binary ↔ Hex Converter</button>
+        <button class="tool-button" onclick="openTool('wavefreq')">Wavelength ↔ Frequency Converter</button>
+        <button class="tool-button" onclick="openTool('voltage-divider')">Voltage Divider Calculator</button>
+        <button class="tool-button" onclick="openTool('ohms-law')">Ohm's Law Calculator</button>
+      </div>
+    </section>
+
+    <!-- DMX & Lighting Tools -->
+    <section class="section" id="sec-dmx">
+      <div class="section-header" onclick="toggleSection('dmx')">
+        <div class="section-title">DMX & Lighting Tools</div>
+        <button class="section-toggle">Toggle</button>
+      </div>
+      <div class="section-body" id="dmx-body">
+        <button class="tool-button" onclick="openTool('dmx-dip')">DMX DIP Switch Calculator</button>
+        <button class="tool-button" onclick="openTool('dmx-decoder')">DMX Value Decoder (0–255 → %)</button>
+        <button class="tool-button" onclick="openTool('fixture-mapper')">Fixture Channel Mapper</button>
+        <button class="tool-button" onclick="openTool('color-mix')">Color Mixing Tool (RGB)</button>
+      </div>
+    </section>
+
+    <!-- General Utilities -->
+    <section class="section" id="sec-general">
+      <div class="section-header" onclick="toggleSection('general')">
+        <div class="section-title">General Utilities</div>
+        <button class="section-toggle">Toggle</button>
+      </div>
+      <div class="section-body" id="general-body">
+        <button class="tool-button" onclick="openTool('arith')">Binary / Hex Calculator</button>
+        <button class="tool-button" onclick="openTool('bitwise')">Bitwise Visualizer</button>
+        <button class="tool-button" onclick="openTool('unitconv')">Unit Converter (length / weight / temperature)</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="main-footer">
+    <p>© 2025 Blue Nexus. All rights reserved.</p>
+  </footer>
+
+  <!-- ===== POPUPS FOR EACH TOOL ===== -->
+
+  <!-- Hex <-> RGB -->
+  <div class="popup" id="hexrgb">
+    <div class="popup-header">
+      <h3>Hex ↔ RGB Converter</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Hex</label>
+        <input id="hex-input" placeholder="#RRGGBB or RRGGBB" />
+        <button class="tool-button" style="min-width:120px;" onclick="hexToRgb()">Convert to RGB</button>
+      </div>
+      <div class="col">
+        <label>R, G, B (0–255)</label>
+        <input id="r-input" type="number" min="0" max="255" placeholder="R (e.g. 34)">
+        <input id="g-input" type="number" min="0" max="255" placeholder="G (e.g. 34)" style="margin-top:8px;">
+        <input id="b-input" type="number" min="0" max="255" placeholder="B (e.g. 34)" style="margin-top:8px;">
+        <button class="tool-button" style="min-width:120px;margin-top:8px;" onclick="rgbToHex()">Convert to Hex</button>
+      </div>
+    </div>
+
+    <div id="hexrgb-result" class="result-block" aria-live="polite"></div>
+  </div>
+
+  <!-- Decimal/Binary/Hex converter -->
+  <div class="popup" id="baseconv">
+    <div class="popup-header">
+      <h3>Decimal ↔ Binary ↔ Hexadecimal Converter</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Input (number)</label>
+        <input id="base-input" type="number" placeholder="Enter decimal number">
+        <button class="tool-button" onclick="convertBases()">Convert</button>
+      </div>
+      <div class="col">
+        <label>Results</label>
+        <div id="base-result" class="result-block">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASCII converter -->
+  <div class="popup" id="ascii">
+    <div class="popup-header">
+      <h3>ASCII ↔ Binary ↔ Hex Converter</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Text</label>
+        <input id="ascii-text" placeholder="Type text here">
+        <button class="tool-button" onclick="textToCodes()">To Binary/Hex</button>
+      </div>
+      <div class="col">
+        <label>Binary / Hex</label>
+        <textarea id="ascii-result" rows="5" style="width:100%;"></textarea>
+        <button class="tool-button" style="margin-top:8px;" onclick="codesToText()">Binary/Hex → Text</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wavelength <-> Frequency -->
+  <div class="popup" id="wavefreq">
+    <div class="popup-header">
+      <h3>Wavelength ↔ Frequency Converter</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Wavelength (nm)</label>
+        <input id="wavelength" type="number" placeholder="e.g. 550">
+        <button class="tool-button" onclick="wfConvert('toFreq')">To Frequency (Hz)</button>
+      </div>
+      <div class="col">
+        <label>Frequency (Hz)</label>
+        <input id="frequency" type="number" placeholder="e.g. 5e14">
+        <button class="tool-button" onclick="wfConvert('toWave')">To Wavelength (nm)</button>
+      </div>
+    </div>
+
+    <div id="wavefreq-result" class="result-block">—</div>
+  </div>
+
+  <!-- Voltage Divider -->
+  <div class="popup" id="voltage-divider">
+    <div class="popup-header">
+      <h3>Voltage Divider Calculator</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Vin (V)</label>
+        <input id="vd-vin" type="number" placeholder="Input voltage">
+      </div>
+      <div class="col">
+        <label>R1 (Ω)</label>
+        <input id="vd-r1" type="number" placeholder="R1">
+      </div>
+      <div class="col">
+        <label>R2 (Ω)</label>
+        <input id="vd-r2" type="number" placeholder="R2">
+      </div>
+    </div>
+    <button class="tool-button" onclick="calcVoltageDivider()">Calculate Vout</button>
+    <div id="vd-result" class="result-block">—</div>
+  </div>
+
+  <!-- Ohm's law -->
+  <div class="popup" id="ohms-law">
+    <div class="popup-header">
+      <h3>Ohm's Law Calculator</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Voltage (V)</label>
+        <input id="ohm-v" type="number" placeholder="V">
+      </div>
+      <div class="col">
+        <label>Current (A)</label>
+        <input id="ohm-i" type="number" placeholder="I">
+      </div>
+      <div class="col">
+        <label>Resistance (Ω)</label>
+        <input id="ohm-r" type="number" placeholder="R">
+      </div>
+    </div>
+    <button class="tool-button" onclick="calcOhms()">Calculate</button>
+    <div id="ohm-result" class="result-block">—</div>
+  </div>
+
+  <!-- DMX DIP Switch Calculator -->
+  <div class="popup" id="dmx-dip">
+    <div class="popup-header">
+      <h3>DMX DIP Switch Calculator</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>DMX Address (1–512)</label>
+        <input id="dmx-addr" type="number" min="1" max="512" placeholder="Enter DMX start address">
+        <button class="tool-button" onclick="dmxDip()">Calculate DIP switches</button>
+      </div>
+    </div>
+    <div id="dmx-dip-result" class="result-block">—</div>
+  </div>
+
+  <!-- DMX Value Decoder -->
+  <div class="popup" id="dmx-decoder">
+    <div class="popup-header">
+      <h3>DMX Value Decoder</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>DMX Value (0–255)</label>
+        <input id="dmx-val" type="number" min="0" max="255" placeholder="0–255">
+      </div>
+    </div>
+    <button class="tool-button" onclick="decodeDmx()">Decode</button>
+    <div id="dmx-decoder-result" class="result-block">—</div>
+  </div>
+
+  <!-- Fixture Channel Mapper (simple) -->
+  <div class="popup" id="fixture-mapper">
+    <div class="popup-header">
+      <h3>Fixture Channel Mapper</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+    <div class="row">
+      <div class="col">
+        <label>Channels per fixture</label>
+        <input id="fm-channels" type="number" placeholder="e.g. 8">
+      </div>
+      <div class="col">
+        <label>Number of fixtures</label>
+        <input id="fm-count" type="number" placeholder="e.g. 5">
+      </div>
+    </div>
+    <button class="tool-button" onclick="mapFixture()">Map</button>
+    <div id="fm-result" class="result-block">—</div>
+  </div>
+
+  <!-- Color Mixing Tool -->
+  <div class="popup" id="color-mix">
+    <div class="popup-header">
+      <h3>Color Mixing Tool (RGB)</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Color A (Hex)</label>
+        <input id="mix-a" placeholder="#ff0000">
+      </div>
+      <div class="col">
+        <label>Color B (Hex)</label>
+        <input id="mix-b" placeholder="#0000ff">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <label>Ratio A (0–1)</label>
+        <input id="mix-ratio" type="number" step="0.01" min="0" max="1" value="0.5">
+      </div>
+    </div>
+    <button class="tool-button" onclick="mixColor()">Mix</button>
+    <div id="mix-result" class="result-block">—</div>
+  </div>
+
+  <!-- Binary/Hex Calculator -->
+  <div class="popup" id="arith">
+    <div class="popup-header">
+      <h3>Binary / Hex Calculator</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Value A (decimal)</label>
+        <input id="arith-a" type="number">
+      </div>
+      <div class="col">
+        <label>Value B (decimal)</label>
+        <input id="arith-b" type="number">
+      </div>
+    </div>
+    <div class="row">
+      <select id="arith-op">
+        <option value="add">Add (+)</option>
+        <option value="sub">Subtract (-)</option>
+        <option value="and">AND</option>
+        <option value="or">OR</option>
+        <option value="xor">XOR</option>
+      </select>
+      <button class="tool-button" onclick="calcArith()">Compute</button>
+    </div>
+    <div id="arith-result" class="result-block">—</div>
+  </div>
+
+  <!-- Bitwise Visualizer -->
+  <div class="popup" id="bitwise">
+    <div class="popup-header">
+      <h3>Bitwise Visualizer</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col"><label>Number</label><input id="bw-num" type="number" value="13"></div>
+      <div class="col"><label>Shift / Ops</label>
+        <select id="bw-op">
+          <option value="lshift">Left shift</option>
+          <option value="rshift">Right shift</option>
+          <option value="not">NOT</option>
+        </select>
+      </div>
+      <div class="col"><label>Amount</label><input id="bw-amt" type="number" value="1"></div>
+    </div>
+    <button class="tool-button" onclick="bitwiseViz()">Run</button>
+    <div id="bw-result" class="result-block">—</div>
+  </div>
+
+  <!-- Unit Converter -->
+  <div class="popup" id="unitconv">
+    <div class="popup-header">
+      <h3>Unit Converter</h3>
+      <button class="close-btn" onclick="closeAllPopups()">Close</button>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Type</label>
+        <select id="uc-type" onchange="ucUpdate()">
+          <option value="length">Length</option>
+          <option value="weight">Weight</option>
+          <option value="temperature">Temperature</option>
+        </select>
+      </div>
+      <div class="col">
+        <label>Value</label>
+        <input id="uc-value" type="number" step="any">
+      </div>
+      <div class="col">
+        <label>From</label>
+        <select id="uc-from"></select>
+      </div>
+      <div class="col">
+        <label>To</label>
+        <select id="uc-to"></select>
+      </div>
+    </div>
+    <button class="tool-button" onclick="unitConvert()">Convert</button>
+    <div id="uc-result" class="result-block">—</div>
+  </div>
+
+  <script>
+    /***** UI helpers *****/
+    function toggleSection(id) {
+      const body = document.getElementById(id + '-body') || document.getElementById(id + 'body');
+      if (!body) return;
+      body.classList.toggle('open');
+    }
+
+    function closeAllPopups() {
+      document.querySelectorAll('.popup').forEach(p => p.style.display = 'none');
+    }
+
+    function openTool(id) {
+      // close others, then open requested
+      closeAllPopups();
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'block';
+      // scroll into view for smaller devices
+      el && el.scrollIntoView({block: 'center'});
+    }
+
+    /* ---------------- Hex <-> RGB ---------------- */
+    function hexToRgb() {
+      const hex = (document.getElementById('hex-input').value || '').replace('#','').trim();
+      if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
+        document.getElementById('hexrgb-result').textContent = 'Invalid hex. Use RRGGBB.';
+        return;
+      }
+      const r = parseInt(hex.slice(0,2),16);
+      const g = parseInt(hex.slice(2,4),16);
+      const b = parseInt(hex.slice(4,6),16);
+      document.getElementById('r-input').value = r;
+      document.getElementById('g-input').value = g;
+      document.getElementById('b-input').value = b;
+      document.getElementById('hexrgb-result').textContent = `RGB: ${r}, ${g}, ${b}`;
+    }
+
+    function rgbToHex() {
+      const r = Number(document.getElementById('r-input').value || 0);
+      const g = Number(document.getElementById('g-input').value || 0);
+      const b = Number(document.getElementById('b-input').value || 0);
+      if ([r,g,b].some(v => isNaN(v) || v < 0 || v > 255)) {
+        document.getElementById('hexrgb-result').textContent = 'RGB values must be 0–255';
+        return;
+      }
+      const hex = ((1<<24) + (r<<16) + (g<<8) + b).toString(16).slice(1).toUpperCase();
+      document.getElementById('hex-input').value = '#' + hex;
+      document.getElementById('hexrgb-result').textContent = `Hex: #${hex}`;
+    }
+
+    /* ---------------- Base converter ---------------- */
+    function convertBases() {
+      const n = parseInt(document.getElementById('base-input').value, 10);
+      if (isNaN(n)) { document.getElementById('base-result').textContent = 'Enter a valid integer'; return; }
+      const dec = n;
+      const bin = dec.toString(2);
+      const hex = dec.toString(16).toUpperCase();
+      document.getElementById('base-result').innerHTML = `Decimal: ${dec}<br>Binary: ${bin}<br>Hex: ${hex}`;
+    }
+
+    /* ---------------- ASCII -> binary/hex ---------------- */
+    function textToCodes() {
+      const txt = document.getElementById('ascii-text').value || '';
+      if (!txt) return document.getElementById('ascii-result').value = '';
+      const bin = Array.from(txt).map(c => c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
+      const hex = Array.from(txt).map(c => c.charCodeAt(0).toString(16).padStart(2,'0').toUpperCase()).join(' ');
+      document.getElementById('ascii-result').value = `Binary: ${bin}\nHex: ${hex}`;
+    }
+
+    function codesToText() {
+      const val = document.getElementById('ascii-result').value || '';
+      // try to detect hex or binary
+      const firstLine = val.split('\n')[0].trim();
+      let data = firstLine;
+      if (firstLine.toLowerCase().startsWith('binary:')) data = firstLine.split(':')[1].trim();
+      if (firstLine.toLowerCase().startsWith('hex:')) data = firstLine.split(':')[1].trim();
+      // attempt binary -> text
+      if (/^[01\s]+$/.test(data)) {
+        const chars = data.trim().split(/\s+/).map(b => String.fromCharCode(parseInt(b,2)));
+        document.getElementById('ascii-text').value = chars.join('');
+        return;
+      }
+      // attempt hex -> text
+      if (/^[0-9A-Fa-f\s]+$/.test(data)) {
+        const chars = data.trim().split(/\s+/).map(h => String.fromCharCode(parseInt(h,16)));
+        document.getElementById('ascii-text').value = chars.join('');
+        return;
+      }
+      document.getElementById('ascii-text').value = '';
+    }
+
+    /* ---------------- Wavelength / Frequency ---------------- */
+    // c = 299792458 m/s
+    function wfConvert(mode) {
+      const c = 299792458;
+      if (mode === 'toFreq') {
+        const nm = Number(document.getElementById('wavelength').value);
+        if (!nm) return document.getElementById('wavefreq-result').textContent = 'Enter wavelength in nm';
+        const m = nm * 1e-9;
+        const f = c / m;
+        document.getElementById('wavefreq-result').textContent = `Frequency: ${f.toExponential(6)} Hz`;
+      } else {
+        const f = Number(document.getElementById('frequency').value);
+        if (!f) return document.getElementById('wavefreq-result').textContent = 'Enter frequency in Hz';
+        const m = c / f;
+        const nm = m * 1e9;
+        document.getElementById('wavefreq-result').textContent = `Wavelength: ${nm.toFixed(3)} nm`;
+      }
+    }
+
+    /* ---------------- Voltage Divider ---------------- */
+    function calcVoltageDivider() {
+      const vin = Number(document.getElementById('vd-vin').value);
+      const r1 = Number(document.getElementById('vd-r1').value);
+      const r2 = Number(document.getElementById('vd-r2').value);
+      if ([vin,r1,r2].some(v => isNaN(v))) return document.getElementById('vd-result').textContent = 'Enter Vin, R1 and R2';
+      const vout = vin * (r2 / (r1 + r2));
+      document.getElementById('vd-result').textContent = `Vout = ${vout.toFixed(4)} V`;
+    }
+
+    /* ---------------- Ohm's Law ---------------- */
+    function calcOhms() {
+      const v = Number(document.getElementById('ohm-v').value);
+      const i = Number(document.getElementById('ohm-i').value);
+      const r = Number(document.getElementById('ohm-r').value);
+      let out = '';
+      if (isNaN(v) && isNaN(i) && isNaN(r)) return document.getElementById('ohm-result').textContent = 'Provide at least two of V, I, R';
+      if (!isNaN(v) && !isNaN(i)) { // find R
+        out = `R = V / I = ${(v / i).toFixed(4)} Ω — P = ${(v * i).toFixed(4)} W`;
+      } else if (!isNaN(v) && !isNaN(r)) { // find I
+        out = `I = V / R = ${(v / r).toFixed(4)} A — P = ${(v*v / r).toFixed(4)} W`;
+      } else if (!isNaN(i) && !isNaN(r)) { // find V
+        out = `V = I * R = ${(i * r).toFixed(4)} V — P = ${(i*i * r).toFixed(4)} W`;
+      } else {
+        out = 'Provide exactly two values';
+      }
+      document.getElementById('ohm-result').textContent = out;
+    }
+
+    /* ---------------- DMX DIP Switch Calculator ---------------- */
+    function dmxDip() {
+      const addr = parseInt(document.getElementById('dmx-addr').value, 10);
+      if (isNaN(addr) || addr < 1 || addr > 512) return document.getElementById('dmx-dip-result').textContent = 'Enter address 1–512';
+      // DIP switches are usually 1..9 representing bits 0..8; compute bits for addr
+      const n = addr;
+      // Some DMX dip implementations use offset of 0; many tables show switches for 1-based: represent binary of (addr)
+      // We'll output binary for addr and list switches 1..9 as ON/OFF for addr
+      const bits = (n).toString(2).padStart(9,'0').split('').reverse(); // LSB first
+      let html = `Address: ${n}<br>Binary (LSB first): ${bits.join(' ')}<br><br>Switches ON: `;
+      const on = [];
+      bits.forEach((b,i)=> { if (b==='1') on.push((i+1)); });
+      html += on.length ? on.join(', ') : 'None';
+      document.getElementById('dmx-dip-result').innerHTML = html;
+    }
+
+    /* ---------------- DMX Value Decoder ---------------- */
+    function decodeDmx() {
+      const val = Number(document.getElementById('dmx-val').value);
+      if (isNaN(val) || val < 0 || val > 255) return document.getElementById('dmx-decoder-result').textContent = 'Enter 0–255';
+      const pct = (val / 255) * 100;
+      document.getElementById('dmx-decoder-result').textContent = `Value ${val} → ${pct.toFixed(2)}% intensity`;
+    }
+
+    /* ---------------- Fixture Channel Mapper ---------------- */
+    function mapFixture() {
+      const ch = parseInt(document.getElementById('fm-channels').value,10);
+      const cnt = parseInt(document.getElementById('fm-count').value,10);
+      if (isNaN(ch) || ch < 1 || isNaN(cnt) || cnt < 1) return document.getElementById('fm-result').textContent = 'Enter channels per fixture and count';
+      let html = '';
+      for (let i=0;i<cnt;i++) {
+        const start = i*ch + 1;
+        const end = (i+1)*ch;
+        html += `Fixture ${i+1}: channels ${start} - ${end}<br>`;
+      }
+      document.getElementById('fm-result').innerHTML = html;
+    }
+
+    /* ---------------- Color Mixer ---------------- */
+    function hexToRgbArr(h) {
+      h = h.replace('#','').trim();
+      if (!/^[0-9A-Fa-f]{6}$/.test(h)) return null;
+      return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+    }
+    function rgbToHexStr(r,g,b) {
+      return '#' + [r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+    }
+    function mixColor() {
+      const a = hexToRgbArr(document.getElementById('mix-a').value || '');
+      const b = hexToRgbArr(document.getElementById('mix-b').value || '');
+      const ratio = Number(document.getElementById('mix-ratio').value) || 0.5;
+      if (!a || !b) return document.getElementById('mix-result').textContent = 'Enter valid hex colors';
+      const r = a[0]*ratio + b[0]*(1-ratio);
+      const g = a[1]*ratio + b[1]*(1-ratio);
+      const bl = a[2]*ratio + b[2]*(1-ratio);
+      const hex = rgbToHexStr(r,g,bl);
+      document.getElementById('mix-result').innerHTML = `Result: ${hex} <div style="display:inline-block;margin-left:12px;width:24px;height:24px;background:${hex};border-radius:4px;border:1px solid rgba(0,0,0,0.4);vertical-align:middle;"></div>`;
+    }
+
+    /* ---------------- Binary / Hex Calculator ---------------- */
+    function calcArith() {
+      const a = Number(document.getElementById('arith-a').value || 0);
+      const b = Number(document.getElementById('arith-b').value || 0);
+      const op = document.getElementById('arith-op').value;
+      let res;
+      if (op === 'add') res = a + b;
+      if (op === 'sub') res = a - b;
+      if (op === 'and') res = a & b;
+      if (op === 'or') res = a | b;
+      if (op === 'xor') res = a ^ b;
+      document.getElementById('arith-result').innerHTML = `Dec: ${res}<br>Bin: ${res.toString(2)}<br>Hex: ${res.toString(16).toUpperCase()}`;
+    }
+
+    /* ---------------- Bitwise visualizer ---------------- */
+    function bitwiseViz() {
+      const n = Number(document.getElementById('bw-num').value || 0);
+      const op = document.getElementById('bw-op').value;
+      const amt = Number(document.getElementById('bw-amt').value || 0);
+      let out;
+      if (op === 'lshift') out = n << amt;
+      else if (op === 'rshift') out = n >> amt;
+      else if (op === 'not') out = ~n;
+      document.getElementById('bw-result').innerHTML = `Input: ${n} (bin ${n.toString(2)})<br>Operation: ${op}<br>Result: ${out} (bin ${ (out>>>0).toString(2) })`;
+    }
+
+    /* ---------------- Unit converter ---------------- */
+    const ucUnits = {
+      length: { mm:0.001, cm:0.01, m:1, km:1000, in:0.0254, ft:0.3048, yd:0.9144, mi:1609.34 },
+      weight: { mg:0.001, g:1, kg:1000, oz:28.3495, lb:453.592, ton:1_000_000 },
+      temperature: ['C','F','K']
+    };
+
+    function ucUpdate() {
+      const t = document.getElementById('uc-type').value;
+      const from = document.getElementById('uc-from');
+      const to = document.getElementById('uc-to');
+      from.innerHTML=''; to.innerHTML='';
+      if (t === 'temperature') {
+        ['C','F','K'].forEach(u => { from.innerHTML += `<option value="${u}">${u}</option>`; to.innerHTML += `<option value="${u}">${u}</option>`; });
+      } else {
+        Object.keys(ucUnits[t]).forEach(u => { from.innerHTML += `<option value="${u}">${u}</option>`; to.innerHTML += `<option value="${u}">${u}</option>`; });
+      }
+    }
+    ucUpdate();
+
+    function unitConvert() {
+      const t = document.getElementById('uc-type').value;
+      const val = Number(document.getElementById('uc-value').value);
+      const from = document.getElementById('uc-from').value;
+      const to = document.getElementById('uc-to').value;
+      if (isNaN(val)) return document.getElementById('uc-result').textContent = 'Enter numeric value';
+      let res = val;
+      if (t === 'temperature') {
+        // convert from -> C
+        let c;
+        if (from === 'C') c = val;
+        if (from === 'F') c = (val - 32) * 5/9;
+        if (from === 'K') c = val - 273.15;
+        if (to === 'C') res = c;
+        if (to === 'F') res = (c * 9/5) + 32;
+        if (to === 'K') res = c + 273.15;
+        document.getElementById('uc-result').textContent = `${res.toFixed(4)} ${to}`;
+        return;
+      }
+      const factors = ucUnits[t];
+      res = val * (factors[from] / factors[to]);
+      document.getElementById('uc-result').textContent = `${res.toFixed(6)} ${to}`;
+    }
+
+    /* keep only one popup open when user clicks outside to close */
+    window.addEventListener('click', (e) => {
+      // if clicking outside any popup element, close popups
+      const popups = Array.from(document.querySelectorAll('.popup'));
+      if (popups.some(p => p.style.display === 'block')) {
+        let clickedInsidePopup = false;
+        popups.forEach(p => { if (p.contains(e.target)) clickedInsidePopup = true; });
+        // ignore clicks on tool buttons
+        if (!clickedInsidePopup && !e.target.classList.contains('tool-button')) closeAllPopups();
+      }
+    });
+
+    // Prevent accidental form submits on Enter
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) {
+        // let buttons handle explicit clicks — but avoid form submission/refresh
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>
